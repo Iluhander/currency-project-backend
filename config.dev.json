@@ -1,0 +1,9 @@
+{
+  "SERVE_ENDPOINT": "127.0.0.1",
+  "SERVE_PORT": 8787,
+  "DB_HOST": "127.0.0.1",
+  "DB_PORT": 5432,
+  "DB_USER": "postgres",
+  "DB_PASSWORD": "password",
+  "DB_NAME": "postgres"
+}
