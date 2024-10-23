@@ -1,0 +1,3 @@
+[submodule "currency-project-api"]
+	path = currency-project-api
+	url = https://github.com/laym0n/currency-project-api
