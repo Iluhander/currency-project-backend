@@ -1,9 +1,10 @@
-package services
+package plugins
 
 import (
 	"fmt"
 
 	"github.com/Iluhander/currency-project-backend/internal/model"
+	"github.com/Iluhander/currency-project-backend/internal/model/plugins"
 	"github.com/Iluhander/currency-project-backend/internal/repository/pipelines"
 	"github.com/google/uuid"
 )
@@ -18,17 +19,17 @@ func Init(pipeRepo *pipelines.PipelineRepository) *ExecutionService {
 	}
 }
 
-func (s *ExecutionService) GetPipeline(pluginType int) []*model.Plugin {
-	mergedArr := make([]*model.Plugin, 0)
+func (s *ExecutionService) GetPipeline(pluginType int) []*plugins.Plugin {
+	mergedArr := make([]*plugins.Plugin, 0)
 
 	pipeline := s.pipeRepo.GetPipeline()
 
 	switch pluginType {
-	case model.TAuthPlugin:
+	case plugins.TAuthPlugin:
 		mergedArr = append(mergedArr, pipeline.Auth...)
-	case model.TPaymentPlugin:
+	case plugins.TPaymentPlugin:
 		mergedArr = append(mergedArr, pipeline.Payment...)
-	case model.TStatisticsPlugin:
+	case plugins.TStatisticsPlugin:
 		mergedArr = append(mergedArr, pipeline.Statistics...)
 	default:
 		mergedArr = append(mergedArr, pipeline.Auth...)
@@ -39,25 +40,25 @@ func (s *ExecutionService) GetPipeline(pluginType int) []*model.Plugin {
 	return mergedArr
 }
 
-func (s *ExecutionService) AddPlugin(newData *model.Plugin) (*model.Plugin, error) {
+func (s *ExecutionService) AddPlugin(newData *plugins.Plugin) (*plugins.Plugin, error) {
 	pipeline := s.pipeRepo.GetPipeline()
 	newData.Id = uuid.New().String()
 
-	if newData.Type == model.TAuthPlugin {
+	if newData.Type == plugins.TAuthPlugin {
 		pipeline.Auth = append(pipeline.Auth, newData)
-	} else if newData.Type == model.TPaymentPlugin {
-		pipeline.Auth = append(pipeline.Payment, newData)
-	} else if newData.Type == model.TStatisticsPlugin {
-		pipeline.Auth = append(pipeline.Statistics, newData)
+	} else if newData.Type == plugins.TPaymentPlugin {
+		pipeline.Payment = append(pipeline.Payment, newData)
+	} else if newData.Type == plugins.TStatisticsPlugin {
+		pipeline.Statistics = append(pipeline.Statistics, newData)
 	} else {
-		return nil, fmt.Errorf("unknown plugin type %d", newData.Type)
+		return nil, fmt.Errorf("unknown plugin type %d: %w", newData.Type, model.InvalidDataErr)
 	}
 
 	s.pipeRepo.UpdatePipeline(pipeline)
 	return newData, nil
 }
 
-func (s *ExecutionService) UpdatePlugin(newData *model.Plugin) (*model.Plugin, error) {
+func (s *ExecutionService) UpdatePlugin(newData *plugins.Plugin) (*plugins.Plugin, error) {
 	pipeline := s.pipeRepo.GetPipeline()
 
 	for i, v := range pipeline.Auth {
@@ -87,14 +88,14 @@ func (s *ExecutionService) UpdatePlugin(newData *model.Plugin) (*model.Plugin, e
 		}
 	}
 
-	return nil, fmt.Errorf("plugin not found")
+	return nil, fmt.Errorf("plugin not found: %w", model.NotFoundErr)
 }
 
-func (s *ExecutionService) DeletePlugin(newData *model.Plugin) (error) {
+func (s *ExecutionService) DeletePlugin(pluginId model.TId) (error) {
 	pipeline := s.pipeRepo.GetPipeline()
 
 	for i, v := range pipeline.Auth {
-		if v.Id == newData.Id {
+		if v.Id == pluginId {
 			pipeline.Auth = append(pipeline.Auth[:i], pipeline.Auth[i+1:]...)
 			s.pipeRepo.UpdatePipeline(pipeline)
 
@@ -103,7 +104,7 @@ func (s *ExecutionService) DeletePlugin(newData *model.Plugin) (error) {
 	}
 
 	for i, v := range pipeline.Payment {
-		if v.Id == newData.Id {
+		if v.Id == pluginId {
 			pipeline.Payment = append(pipeline.Payment[:i], pipeline.Payment[i+1:]...)
 			s.pipeRepo.UpdatePipeline(pipeline)
 
@@ -112,7 +113,7 @@ func (s *ExecutionService) DeletePlugin(newData *model.Plugin) (error) {
 	}
 
 	for i, v := range pipeline.Statistics {
-		if v.Id == newData.Id {
+		if v.Id == pluginId {
 			pipeline.Statistics = append(pipeline.Statistics[:i], pipeline.Statistics[i+1:]...)
 			s.pipeRepo.UpdatePipeline(pipeline)
 
@@ -120,5 +121,5 @@ func (s *ExecutionService) DeletePlugin(newData *model.Plugin) (error) {
 		}
 	}
 
-	return fmt.Errorf("plugin not found")
+	return fmt.Errorf("plugin not found: %w", model.NotFoundErr)
 }

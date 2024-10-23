@@ -1,4 +1,4 @@
-package model
+package plugins
 
 type Pipeline struct {
 	Auth []*Plugin

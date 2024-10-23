@@ -7,10 +7,16 @@ import (
 
 	"github.com/Iluhander/currency-project-backend/internal/config"
 	"github.com/Iluhander/currency-project-backend/internal/model"
+	"github.com/Iluhander/currency-project-backend/internal/model/users"
 )
 
 type UsersRepository struct {
 	conn *sql.DB
+}
+
+type OrderedUser struct {
+	Idx int `json:"index"`
+	users.User
 }
 
 func Init(cfg *config.ServiceConfig) (*UsersRepository, func(), error) {
@@ -80,24 +86,37 @@ func (dbRepo *UsersRepository) GetOneBalance(userId model.TId) (float64, error) 
 	return 0, fmt.Errorf("Missing user with id=%s", userId)
 }
 
-func (dbRepo *UsersRepository) GetBalances(offset, limit int, orderType string) ([]model.User, error) {
+func (dbRepo *UsersRepository) GetUsers(offset, limit int, orderField, orderType string) ([]OrderedUser, error) {
+	if orderType != model.TSortAsc && orderType != model.TSortDesc {
+		return make([]OrderedUser, 0), fmt.Errorf("%s is not a valid order type", orderType)
+	}
+	
 	var wg sync.WaitGroup
 	wg.Add(2)
 
-	
-	rows, err := dbRepo.conn.Query("SELECT id, balance, ROW_NUMBER() OVER (ORDER BY balance %s) as idx FROM users ORDER BY balance %s OFFSET %d LIMIT %d", orderType, orderType, offset, limit)
+	rows, err := dbRepo.conn.Query("SELECT id, balance, ROW_NUMBER() OVER (ORDER BY " +
+		orderField + " " + orderType +
+		") as idx FROM users ORDER BY " +
+		orderField + " " + orderType +
+		" OFFSET $1 LIMIT $2",
+		offset,
+		limit)
 
 	if err != nil {
 		return nil, err
 	}
 
-	users := make([]model.User, limit);
+	users := make([]OrderedUser, 0, limit);
 	for rows.Next() {
-		curUser := model.User{}
-		readErr := rows.Scan(&curUser.Id, &curUser.Balance)
+		curUser := OrderedUser{}
+		readErr := rows.Scan(&curUser.Id, &curUser.Balance, &curUser.Idx)
 
 		if readErr != nil {
 			return nil, readErr
+		}
+
+		if curUser.Id == "" {
+			return users, nil
 		}
 
 		users = append(users, curUser)

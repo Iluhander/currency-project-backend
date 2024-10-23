@@ -7,21 +7,21 @@ import (
 	"os"
 	"sync"
 
-	"github.com/Iluhander/currency-project-backend/internal/model"
+	"github.com/Iluhander/currency-project-backend/internal/model/plugins"
 )
 
 type PipelineRepository struct {
-	pipe *model.Pipeline
+	pipe *plugins.Pipeline
 	file string
 	mu *sync.Mutex
 }
 
 func Init(persistFileName string) (*PipelineRepository, error) {
 	res := PipelineRepository{
-		&model.Pipeline{
-			make([]*model.Plugin, 0),
-			make([]*model.Plugin, 0),
-			make([]*model.Plugin, 0),
+		&plugins.Pipeline{
+			make([]*plugins.Plugin, 0),
+			make([]*plugins.Plugin, 0),
+			make([]*plugins.Plugin, 0),
 		},
 		persistFileName,
 		&sync.Mutex{},
@@ -44,7 +44,7 @@ func Init(persistFileName string) (*PipelineRepository, error) {
 	return &res, nil
 }
 
-func (r *PipelineRepository) UpdatePipeline(newPipeline *model.Pipeline) error {
+func (r *PipelineRepository) UpdatePipeline(newPipeline *plugins.Pipeline) error {
 	marshaled, marshalErr := json.Marshal(newPipeline)
 	if marshalErr != nil {
 		return fmt.Errorf("%w; %w", fmt.Errorf("pipeline saving error"), marshalErr)
@@ -60,7 +60,7 @@ func (r *PipelineRepository) UpdatePipeline(newPipeline *model.Pipeline) error {
 	return nil
 }
 
-func (r *PipelineRepository) GetPipeline() *model.Pipeline {
+func (r *PipelineRepository) GetPipeline() *plugins.Pipeline {
 	r.mu.Lock()
 	r.mu.Unlock()
 

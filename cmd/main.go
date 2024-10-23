@@ -6,10 +6,11 @@ import (
 	"strconv"
 
 	"github.com/Iluhander/currency-project-backend/internal/config"
-	"github.com/Iluhander/currency-project-backend/internal/controllers"
+	pluginsControllers "github.com/Iluhander/currency-project-backend/internal/controllers/plugins"
+	usersControllers "github.com/Iluhander/currency-project-backend/internal/controllers/users"
 	"github.com/Iluhander/currency-project-backend/internal/repository/pipelines"
 	"github.com/Iluhander/currency-project-backend/internal/repository/users"
-	"github.com/Iluhander/currency-project-backend/internal/services"
+	pluginsService "github.com/Iluhander/currency-project-backend/internal/services/plugins"
 	usersService "github.com/Iluhander/currency-project-backend/internal/services/users"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
@@ -41,7 +42,7 @@ func main() {
 	}
 
 	userService := usersService.Init(dbRepo)
-	executionService := services.Init(pipeRepo)
+	executionService := pluginsService.Init(pipeRepo)
 
 	if prod {
 		gin.SetMode(gin.ReleaseMode)
@@ -56,9 +57,8 @@ func main() {
 		AllowMethods:     []string{"*"},
 	}))
 
-	base := r.Group("/")
-
-	controllers.Route(base, userService, executionService)
+	usersControllers.Route(r.Group("users"), userService)
+	pluginsControllers.Route(r.Group("plugins"), executionService)
 
 	r.Run(fmt.Sprint(":", strconv.Itoa(int(cfg.ServePort))))
 }
