@@ -1,6 +1,6 @@
 # Virtual currency service
 
-Provides a thin additional layer above payment systems. The layer stores currency balances of users. The service functionality may be extended using a pipeline.
+Provides a thin additional layer above payment systems. The layer stores currency balances of users. The service functionality may be extended by modifying the request pipeline handler.
 
 ## Usage
 
@@ -18,7 +18,7 @@ Provides a thin additional layer above payment systems. The layer stores currenc
   - Executable: ```go build -o srvr ./cmd/main.g```
 * Run the service with:
   - Docker: ```sudo docker run -d -p 8787:8787 --network <db_network>  mse-back:1.0```
-* Each user balance modification request is handled by this service and external services in a specific order. This order declared by an implementation of the *Pipeline* pattern in the virtual currency service. You can modify the pipeline using the api, described in the currency-project-api/openapi-back.yaml. There are currenly 3 types of pipelines:
+* Setup requests handling logic: each user balance modification request is handled by this service and external services in a specific order. This order is declared in an implementation of the *Pipeline* pattern in the virtual currency service. You can modify the pipeline using the api, described in the currency-project-api/openapi-back.yaml. There are currenly 3 types of pipelines:
   - *Statistics* service, being called first to observe the state of the system,
   - *Authentication* services, being called second to control the access,
   - *Payment* service, being called at the end to perform the payment.
