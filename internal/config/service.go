@@ -18,6 +18,11 @@ type ServiceConfig struct {
 	DBName string `json:"DB_NAME"`
 }
 
+const (
+	DefaultListenedPort = 8787
+	DefaultDBPort = 5432
+)
+
 func Init(prod bool) (config *ServiceConfig, err error) {
 	configPath := ".env"
 	if !prod {
@@ -26,7 +31,7 @@ func Init(prod bool) (config *ServiceConfig, err error) {
 	
 	_, fileErr := os.Stat("/path/to/whatever")
 	if fileErr != nil {
-		log.Printf("Failed opening %s file\n", configPath)
+		log.Printf("Warning: Failed opening %s file\n", configPath)
 	}
 
 	if fileErr == nil {
@@ -39,9 +44,9 @@ func Init(prod bool) (config *ServiceConfig, err error) {
 	portStr := os.Getenv("SERVE_PORT")
 	port, portParseErr := strconv.Atoi(portStr)
 	if portParseErr != nil {
-		log.Println("Failed reading the SERVE_PORT env")
+		log.Printf("Warning: Failed reading the SERVE_PORT env. Using %d.\n", DefaultListenedPort)
 
-		port = 8787
+		port = DefaultListenedPort
 	}
 
 	config = &ServiceConfig{}
@@ -53,9 +58,9 @@ func Init(prod bool) (config *ServiceConfig, err error) {
 	dbPortStr := os.Getenv("DB_PORT")
 	dbPort, dbPortParseErr := strconv.Atoi(dbPortStr)
 	if dbPortParseErr != nil {
-		log.Println("Failed reading the DB_PORT env")
+		log.Printf("Warning: Failed reading the DB_PORT env. Using %d.\n", DefaultDBPort)
 
-		dbPort = 5432
+		dbPort = DefaultDBPort
 	}
 
 	config.DBPort = uint16(dbPort)
