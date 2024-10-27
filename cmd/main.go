@@ -8,12 +8,14 @@ import (
 	"strconv"
 
 	"github.com/Iluhander/currency-project-backend/internal/config"
+	balanceControllers "github.com/Iluhander/currency-project-backend/internal/controllers/balance"
 	pluginsControllers "github.com/Iluhander/currency-project-backend/internal/controllers/plugins"
 	usersControllers "github.com/Iluhander/currency-project-backend/internal/controllers/users"
 	"github.com/Iluhander/currency-project-backend/internal/migrations"
 	usersMigrations "github.com/Iluhander/currency-project-backend/internal/migrations/users"
 	"github.com/Iluhander/currency-project-backend/internal/repository/pipelines"
 	"github.com/Iluhander/currency-project-backend/internal/repository/users"
+	"github.com/Iluhander/currency-project-backend/internal/services/balance"
 	pluginsService "github.com/Iluhander/currency-project-backend/internal/services/plugins"
 	usersService "github.com/Iluhander/currency-project-backend/internal/services/users"
 	"github.com/gin-contrib/cors"
@@ -74,8 +76,9 @@ func main() {
 		panic(err)
 	}
 
-	userService := usersService.Init(dbRepo)
-	executionService := pluginsService.Init(pipeRepo)
+	pluginsService := pluginsService.Init(pipeRepo)
+	userService := usersService.Init(dbRepo, conn, pluginsService)
+	balanceService := balance.Init(userService, dbRepo, pluginsService)
 
 	if prod {
 		gin.SetMode(gin.ReleaseMode)
@@ -91,7 +94,8 @@ func main() {
 	}))
 
 	usersControllers.Route(r.Group("users"), userService)
-	pluginsControllers.Route(r.Group("plugins"), executionService)
+	pluginsControllers.Route(r.Group("plugins"), pluginsService)
+	balanceControllers.Route(r.Group("balance"), balanceService)
 
 	listenTo := fmt.Sprint(cfg.ServeEnpoint, ":", strconv.Itoa(int(cfg.ServePort)))
 	log.Println("Listening to", listenTo)

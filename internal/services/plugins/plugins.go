@@ -9,17 +9,17 @@ import (
 	"github.com/google/uuid"
 )
 
-type ExecutionService struct {
+type PluginsService struct {
 	pipeRepo *pipelines.PipelineRepository
 }
 
-func Init(pipeRepo *pipelines.PipelineRepository) *ExecutionService {
-	return &ExecutionService {
+func Init(pipeRepo *pipelines.PipelineRepository) *PluginsService {
+	return &PluginsService {
 		pipeRepo,
 	}
 }
 
-func (s *ExecutionService) GetPipeline(pluginType string) []*plugins.Plugin {
+func (s *PluginsService) GetPipeline(pluginType string) []*plugins.Plugin {
 	mergedArr := make([]*plugins.Plugin, 0)
 
 	pipeline := s.pipeRepo.GetPipeline()
@@ -40,7 +40,7 @@ func (s *ExecutionService) GetPipeline(pluginType string) []*plugins.Plugin {
 	return mergedArr
 }
 
-func (s *ExecutionService) AddPlugin(newData *plugins.Plugin) (*plugins.Plugin, error) {
+func (s *PluginsService) AddPlugin(newData *plugins.Plugin) (*plugins.Plugin, error) {
 	pipeline := s.pipeRepo.GetPipeline()
 	newData.Id = uuid.New().String()
 
@@ -58,7 +58,7 @@ func (s *ExecutionService) AddPlugin(newData *plugins.Plugin) (*plugins.Plugin, 
 	return newData, nil
 }
 
-func (s *ExecutionService) UpdatePlugin(newData *plugins.Plugin) (*plugins.Plugin, error) {
+func (s *PluginsService) UpdatePlugin(newData *plugins.Plugin) (*plugins.Plugin, error) {
 	pipeline := s.pipeRepo.GetPipeline()
 
 	for i, v := range pipeline.Auth {
@@ -91,7 +91,7 @@ func (s *ExecutionService) UpdatePlugin(newData *plugins.Plugin) (*plugins.Plugi
 	return nil, fmt.Errorf("plugin not found: %w", model.NotFoundErr)
 }
 
-func (s *ExecutionService) DeletePlugin(pluginId model.TId) (error) {
+func (s *PluginsService) DeletePlugin(pluginId model.TId) (error) {
 	pipeline := s.pipeRepo.GetPipeline()
 
 	for i, v := range pipeline.Auth {

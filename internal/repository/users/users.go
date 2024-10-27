@@ -24,23 +24,20 @@ func Init(conn *sql.DB) *UsersRepository {
 	}
 }
 
-func (dbRepo *UsersRepository) ChangeCurrency(userId model.TId, amount float64) (updatedBalance int, resErr error) {
-	_, err := dbRepo.conn.Query("UPDATE users SET balance = balance + amount")
+func (dbRepo *UsersRepository) TryCreateUser(tx *sql.Tx, userId model.TId) error {
+	_, err := tx.Exec(fmt.Sprintf("insert into users (id, balance) values (uuid('%s'), 0) on conflict do nothing", userId))
 
-	tx, err := dbRepo.conn.Begin()
+	return err
+}
+
+func (dbRepo *UsersRepository) ChangeCurrency(tx *sql.Tx, userId model.TId, amount float64) (updatedBalance float64, resErr error) {
+	_, err := tx.Exec(fmt.Sprintf("UPDATE users SET balance = balance + %f WHERE id=uuid('%s')", amount, userId))
 	if err != nil {
 		return 0, err
 	}
 
-	_, err = tx.Exec("SET TRANSACTION ISOLATION LEVEL REPEATABLE READ")
-	_, err = tx.Exec("UPDATE users SET balance = balance + %d WHERE id=%s", amount, userId)
 	var row *sql.Row
-	row = tx.QueryRow("SELECT balance FROM users WHERE id=%s", userId)
-	_, err = tx.Exec("COMMIT;")
-
-	if err != nil {
-		return 0, err
-	}
+	row = tx.QueryRow(fmt.Sprintf("SELECT balance FROM users WHERE id=uuid('%s')", userId))
 
 	scanErr := row.Scan(&updatedBalance)
 	if scanErr != nil {
@@ -51,7 +48,7 @@ func (dbRepo *UsersRepository) ChangeCurrency(userId model.TId, amount float64) 
 }
 
 func (dbRepo *UsersRepository) GetOneBalance(userId model.TId) (float64, error) {
-	rows, err := dbRepo.conn.Query(fmt.Sprintf("SELECT amount FROM users WHERE id=%s", userId))
+	rows, err := dbRepo.conn.Query(fmt.Sprintf("SELECT amount FROM users WHERE id=uuid('%s')", userId))
 
 	if err != nil {
 		return 0, err
@@ -108,5 +105,57 @@ func (dbRepo *UsersRepository) GetUsers(offset, limit int, orderField, orderType
 	}
 
 	return users, nil
+}
+
+func (dbRepo *UsersRepository) CountUsers() (int, error) {
+	rows, err := dbRepo.conn.Query("SELECT COUNT(*) as total FROM users")
+
+	if err != nil {
+		return 0, err
+	}
+
+	for rows.Next() {
+		var count int
+		readErr := rows.Scan(&count)
+
+		if readErr != nil {
+			return 0, readErr
+		}
+
+		return count, nil
+	}
+
+	return 0, nil
+}
+
+func (dbRepo *UsersRepository) CreateUserOrder (userId, orderId model.TId, amount float64) error {
+	_, err := dbRepo.conn.Exec(fmt.Sprintf("INSERT INTO users_orders (user_id, order_id, amount) values (uuid('%s'), uuid('%s'), %f)", userId, orderId, amount))
+
+	return err
+}
+
+func (dbRepo *UsersRepository) RemoveUserOrder (userOrderRecordId model.TId) error {
+	_, err := dbRepo.conn.Exec(fmt.Sprintf("DELETE FROM users_orders WHERE id=uuid('%s')", userOrderRecordId))
+
+	return err
+}
+
+func (dbRepo *UsersRepository) GetUserOrders (userId model.TId) (orders []users.UserOrder, err error) {
+	rows, err := dbRepo.conn.Query(fmt.Sprintf("SELECT id, order_id as orderId, amount, user_id as userId FROM users_orders WHERE user_id=uuid('%s')", userId))
+	if err != nil {
+		return make([]users.UserOrder, 0), err
+	}
+	
+	orders = make([]users.UserOrder, 0)
+	for rows.Next() {
+		var order users.UserOrder
+		readErr := rows.Scan(&order.Id, &order.OrderId, &order.Amount, &order.UserId)
+
+		if readErr != nil {
+			return make([]users.UserOrder, 0), readErr
+		}
+	}
+
+	return orders, nil
 }
 

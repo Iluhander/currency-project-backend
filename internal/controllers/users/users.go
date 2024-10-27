@@ -34,7 +34,7 @@ func (c *UsersController) findUsers(ctx *gin.Context) {
 		sort = model.TSortDesc
 	}
 	
-	users, err := c.service.GetUsers(pageNumber * pageSize, pageSize, sortField, sort)
+	result, err := c.service.GetUsers(pageNumber * pageSize, pageSize, sortField, sort)
 	if err != nil {
 		if errors.Is(err, model.InvalidDataErr) {
 			ctx.JSON(400, gin.H{
@@ -50,6 +50,7 @@ func (c *UsersController) findUsers(ctx *gin.Context) {
 	}
 
 	ctx.JSON(200, gin.H{
-		"users": users,
+		"users": result.Users,
+		"pagination": result.Pagination,
 	})
 }

@@ -12,10 +12,10 @@ import (
 )
 
 type PluginsController struct {
-	execService *plugins.ExecutionService 
+	execService *plugins.PluginsService 
 }
 
-func Route(r *gin.RouterGroup, execService *plugins.ExecutionService) (controller *PluginsController) {
+func Route(r *gin.RouterGroup, execService *plugins.PluginsService) (controller *PluginsController) {
 	c := PluginsController{execService}
 
 	r.GET("/", c.findPlugins)

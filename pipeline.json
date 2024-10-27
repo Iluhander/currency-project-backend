@@ -1,1 +1,1 @@
-{"Auth":[{"id":"f5307519-57b7-4888-8d37-e04c8446466d","host":":8080","type":"AUTHENTICATION"}],"Payment":[{"id":"9a7aee44-e375-46ed-ad5d-decb9e023898","host":":8080","type":"PAYMENT"}],"Statistics":[]}
+{"Auth":[{"id":"f5307519-57b7-4888-8d37-e04c8446466d","host":":8080","type":"AUTHENTICATION"}],"Payment":[{"id":"67c90995-f421-4a3c-a229-8fec6b34ed11","host":"127.0.0.1:57669","type":"PAYMENT"}],"Statistics":[]}
