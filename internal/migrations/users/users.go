@@ -1,4 +1,4 @@
-package migrations
+package users
 
 import (
 	"database/sql"

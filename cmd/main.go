@@ -11,6 +11,7 @@ import (
 	pluginsControllers "github.com/Iluhander/currency-project-backend/internal/controllers/plugins"
 	usersControllers "github.com/Iluhander/currency-project-backend/internal/controllers/users"
 	"github.com/Iluhander/currency-project-backend/internal/migrations"
+	usersMigrations "github.com/Iluhander/currency-project-backend/internal/migrations/users"
 	"github.com/Iluhander/currency-project-backend/internal/repository/pipelines"
 	"github.com/Iluhander/currency-project-backend/internal/repository/users"
 	pluginsService "github.com/Iluhander/currency-project-backend/internal/services/plugins"
@@ -51,7 +52,14 @@ func main() {
 	if migrationErr != nil {
 		panic(migrationErr)
 	} else {
-		log.Println("Migrations executed successfully")
+		log.Println("Basic migrations executed successfully")
+	}
+
+	usersMigrationsErr := usersMigrations.Init(conn).Run()
+	if usersMigrationsErr != nil {
+		panic(usersMigrationsErr)
+	} else {
+		log.Println("Users migrations executed successfully")
 	}
 	
 	dbRepo := users.Init(conn)
