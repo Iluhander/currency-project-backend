@@ -1,6 +1,7 @@
 package config
 
 import (
+	"log"
 	"os"
 	"strconv"
 
@@ -23,15 +24,24 @@ func Init(prod bool) (config *ServiceConfig, err error) {
 		configPath = ".env.development"
 	}
 	
-	err = godotenv.Load(configPath)
-	if err != nil {
-		return nil, err
+	_, fileErr := os.Stat("/path/to/whatever")
+	if fileErr != nil {
+		log.Printf("Failed opening %s file\n", configPath)
+	}
+
+	if fileErr == nil {
+		err = godotenv.Load(configPath)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	portStr := os.Getenv("SERVE_PORT")
 	port, portParseErr := strconv.Atoi(portStr)
 	if portParseErr != nil {
-		return nil, portParseErr
+		log.Println("Failed reading the SERVE_PORT env")
+
+		port = 8787
 	}
 
 	config = &ServiceConfig{}
@@ -43,7 +53,9 @@ func Init(prod bool) (config *ServiceConfig, err error) {
 	dbPortStr := os.Getenv("DB_PORT")
 	dbPort, dbPortParseErr := strconv.Atoi(dbPortStr)
 	if dbPortParseErr != nil {
-		return nil, dbPortParseErr
+		log.Println("Failed reading the DB_PORT env")
+
+		dbPort = 5432
 	}
 
 	config.DBPort = uint16(dbPort)

@@ -17,7 +17,6 @@ FROM alpine:latest
 WORKDIR /app
 
 COPY --from=builder /app/srvr .
-COPY --from=builder /app/.env .
 
 EXPOSE 8787
 
