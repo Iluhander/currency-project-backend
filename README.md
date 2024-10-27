@@ -28,6 +28,7 @@ Provides a thin additional layer above payment systems. The layer stores currenc
 ### Technologies
 
 - The [Go](https://go.dev/tour/welcome/1) language
+- The [gin](https://github.com/gin-gonic/gin) router
 - The [Docker](https://docs.docker.com/) containerization system
 - The [Postgres](https://www.postgresql.org/docs/) database
 - HTTP Protocol
