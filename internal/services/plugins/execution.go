@@ -19,7 +19,7 @@ func Init(pipeRepo *pipelines.PipelineRepository) *ExecutionService {
 	}
 }
 
-func (s *ExecutionService) GetPipeline(pluginType int) []*plugins.Plugin {
+func (s *ExecutionService) GetPipeline(pluginType string) []*plugins.Plugin {
 	mergedArr := make([]*plugins.Plugin, 0)
 
 	pipeline := s.pipeRepo.GetPipeline()

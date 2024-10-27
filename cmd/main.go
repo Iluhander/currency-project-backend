@@ -1,13 +1,16 @@
 package main
 
 import (
+	"database/sql"
 	"flag"
 	"fmt"
+	"log"
 	"strconv"
 
 	"github.com/Iluhander/currency-project-backend/internal/config"
 	pluginsControllers "github.com/Iluhander/currency-project-backend/internal/controllers/plugins"
 	usersControllers "github.com/Iluhander/currency-project-backend/internal/controllers/users"
+	"github.com/Iluhander/currency-project-backend/internal/migrations"
 	"github.com/Iluhander/currency-project-backend/internal/repository/pipelines"
 	"github.com/Iluhander/currency-project-backend/internal/repository/users"
 	pluginsService "github.com/Iluhander/currency-project-backend/internal/services/plugins"
@@ -27,14 +30,36 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	
-	dbRepo, closeCallback, err := users.Init(cfg)
+
+	psqlInfo := fmt.Sprintf("host=%s port=%d user=%s "+
+		"password=%s dbname=%s sslmode=disable",
+		cfg.DBHost, cfg.DBPort, cfg.DBUser, cfg.DBPassword, cfg.DBName)
+
+	conn, err := sql.Open("postgres", psqlInfo)
 	if err != nil {
 		panic(err)
+	} else {
+		log.Println("Opened a db connection")
 	}
 
-	defer closeCallback()
+	defer func(conn *sql.DB) {
+		log.Println("Closing the db connection")
+		conn.Close()
+	}(conn)
 
+	migrationErr := migrations.Init(conn).Run()
+	if migrationErr != nil {
+		panic(migrationErr)
+	} else {
+		log.Println("Migrations executed successfully")
+	}
+	
+	dbRepo := users.Init(conn)
+	if err != nil {
+		panic(err)
+	} else {
+		log.Printf("Connected to db %s:%d\n", cfg.DBHost, cfg.DBPort)
+	}
 
 	pipeRepo, err := pipelines.Init("pipeline.json")
 	if err != nil {
@@ -60,7 +85,9 @@ func main() {
 	usersControllers.Route(r.Group("users"), userService)
 	pluginsControllers.Route(r.Group("plugins"), executionService)
 
-	r.Run(fmt.Sprint(":", strconv.Itoa(int(cfg.ServePort))))
+	listenTo := fmt.Sprint(cfg.ServeEnpoint, ":", strconv.Itoa(int(cfg.ServePort)))
+	log.Println("Listening to", listenTo)
+	r.Run(listenTo)
 }
 
 

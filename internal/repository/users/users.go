@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/Iluhander/currency-project-backend/internal/config"
 	"github.com/Iluhander/currency-project-backend/internal/model"
 	"github.com/Iluhander/currency-project-backend/internal/model/users"
 )
@@ -19,24 +18,10 @@ type OrderedUser struct {
 	users.User
 }
 
-func Init(cfg *config.ServiceConfig) (*UsersRepository, func(), error) {
-	psqlInfo := fmt.Sprintf("host=%s port=%d user=%s "+
-		"password=%s dbname=%s sslmode=disable",
-		cfg.DBHost, cfg.DBPort, cfg.DBUser, cfg.DBPassword, cfg.DBName)
-
-	conn, err := sql.Open("postgres", psqlInfo)
-
-	close := func() {
-		conn.Close()
-	}
-
-	if err != nil {
-		return nil, nil, err
-	}
-
+func Init(conn *sql.DB) *UsersRepository {
 	return &UsersRepository{
 		conn,
-	}, close, nil
+	}
 }
 
 func (dbRepo *UsersRepository) ChangeCurrency(userId model.TId, amount float64) (updatedBalance int, resErr error) {

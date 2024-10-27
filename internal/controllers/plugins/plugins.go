@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"errors"
 	"io"
-	"strconv"
 
 	"github.com/Iluhander/currency-project-backend/internal/model"
 	pluginsModel "github.com/Iluhander/currency-project-backend/internal/model/plugins"
@@ -28,7 +27,7 @@ func Route(r *gin.RouterGroup, execService *plugins.ExecutionService) (controlle
 }
 
 func (c *PluginsController) findPlugins(ctx *gin.Context) {
-	pluginId, _ := strconv.Atoi(ctx.Query("type"))
+	pluginId := ctx.Query("type")
 	plugins := c.execService.GetPipeline(pluginId)
 
 	ctx.JSON(200, gin.H{

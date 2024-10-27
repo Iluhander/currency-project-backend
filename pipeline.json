@@ -1,1 +1,1 @@
-{"Auth":[],"Payment":[],"Statistics":[]}
+{"Auth":[{"id":"f5307519-57b7-4888-8d37-e04c8446466d","host":":8080","type":"AUTHENTICATION"}],"Payment":[{"id":"9a7aee44-e375-46ed-ad5d-decb9e023898","host":":8080","type":"PAYMENT"}],"Statistics":[]}

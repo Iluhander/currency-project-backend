@@ -29,7 +29,7 @@ func Init(prod bool) (config *ServiceConfig, err error) {
 		configPath = ".env.development"
 	}
 	
-	_, fileErr := os.Stat("/path/to/whatever")
+	_, fileErr := os.Stat(configPath)
 	if fileErr != nil {
 		log.Printf("Warning: Failed opening %s file\n", configPath)
 	}
