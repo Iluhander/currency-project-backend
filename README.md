@@ -5,13 +5,13 @@ Provides a thin additional layer above payment systems. The layer stores currenc
 ## Usage
 
 * Specify configuration in a *.env* file at the root of the project. The config should include the following fields:
-  - ```SERVE_ENDPOINT```
-  - ```SERVE_PORT```
-  - ```DB_HOST```
-  - ```DB_PORT```
-  - ```DB_USER```
-  - ```DB_PASSWORD```
-  - ```DB_NAME```
+  - ```SERVE_ENDPOINT```: the ip or domain name listened by the application. Defaults to '127.0.0.1'
+  - ```SERVE_PORT```: the port listened by the application. Defaults to 8787.
+  - ```DB_HOST```: the ip or domain name of the DBMS. 'Defaults to 127.0.0.1'
+  - ```DB_PORT```: the port listened by the DBMS. Defaults to 5432.
+  - ```DB_USER```: the database user.
+  - ```DB_PASSWORD```: the database user's password.
+  - ```DB_NAME```: the database name.
 * Note, that for now only the postgres database is supported
 * Build the service:
   - Docker: ```sudo docker build -t mse-back:1.0 .  ```
