@@ -30,7 +30,7 @@ func (m *UsersMigrations) Run() error {
 		"order_id uuid NOT NULL,\n" +
 		"amount numeric NULL DEFAULT 0,\n" +
 		"CONSTRAINT users_orders_pkey PRIMARY KEY (id),\n" +
-		"CONSTRAINT users_orders_user_id_fk FOREIGN KEY (id) REFERENCES users (id)\n" +
+		"CONSTRAINT users_orders_user_id_fk FOREIGN KEY (user_id) REFERENCES users (id)\n" +
 		")",
 	)
 

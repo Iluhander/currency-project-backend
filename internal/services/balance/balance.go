@@ -25,7 +25,7 @@ type PayRequest struct {
 }
 
 type PayResponse struct {
-	Id string `json:"id"`
+	Id string `json:"Id"`
 }
 
 func Init(usersService *usersServices.UsersService, usersRepository *users.UsersRepository, pluginsService *pluginsServices.PluginsService) *BalanceService {
@@ -53,7 +53,7 @@ func (b *BalanceService) AddCurrency(userId model.TId, amount, cost float64) (st
 	}
 
 	reqBody := PayRequest{
-		Amount: amount,
+		Amount: cost,
 		String: fmt.Sprintf("Purchase by user with id=%s of %f digital items", userId, amount),
 	}
 
@@ -83,7 +83,7 @@ func (b *BalanceService) AddCurrency(userId model.TId, amount, cost float64) (st
 		return "", orderCreationErr
 	}
 
-	resp, err := http.Get(fmt.Sprintf("http://%s/api/status/%s", paymentPlugin, payRes.Id))
+	resp, err := http.Get(fmt.Sprintf("http://%s/api/status/%s", paymentPlugin.Host, payRes.Id))
 
 	var cResp usersServices.OrderStatus
 	if err == nil {
@@ -93,6 +93,10 @@ func (b *BalanceService) AddCurrency(userId model.TId, amount, cost float64) (st
 	}
 
 	defer resp.Body.Close()
+
+	if len( cResp.Data.Operation) == 0 {
+		return "", model.InternalErr
+	}
 
 	return cResp.Data.Operation[0].Link, nil
 }
